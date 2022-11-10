@@ -38,20 +38,73 @@ namespace Base64ToFile
             try
             {
                 byte[] bytes = Encoding.ASCII.GetBytes(base64String);
-                char[] chars = Encoding.ASCII.GetString(bytes).ToCharArray(); 
+                char[] chars = Encoding.ASCII.GetString(bytes).ToCharArray();
+
+                int len = (chars.Length * 6) / 8;
+                byte[] buffer = new byte[len];
+                int index = 0;
+
                 string binaryStr = "";
                 for (int i = 0; i < chars.Length; i++)
                 {
-                    for (int j = 0; j < base64tables.Length; j++)
+                    int a = -1; 
+                    if (chars[i] >= '0' && chars[i] <= '9')
+                    {
+                        a = (chars[i] - 48) + 52;
+                    }
+                    else if(chars[i] >= 'A' && chars[i] <= 'Z')
+                    {
+                        a = chars[i] - 65;
+                    }
+                    else if (chars[i] >= 'a' && chars[i] <= 'z')
+                    {
+                        a = (chars[i] - 97) + 26;
+                    } 
+                    else if (chars[i] == '+')
+                    {
+                        a = 62;
+                    }
+                    else if (chars[i] == '/')
+                    {
+                        a = 63;
+                    }
+                    if (a >= 0)
+                    {
+                        string s = Convert.ToString(a, 2).PadLeft(6, '0');
+                        binaryStr += s;
+
+
+                        if (binaryStr.Length >= 8)
+                        {
+                            string sub = binaryStr.Substring(0, 8);
+                            binaryStr = binaryStr.Substring(8);
+                            //Console.WriteLine("sub: " + sub);
+                            //Console.WriteLine("binaryStr: " + binaryStr);
+
+
+                            byte rByte = Convert.ToByte(sub, 2);
+                            //Console.WriteLine("rByte: " + Convert.ToChar(rByte));
+
+                            buffer[index] = rByte;
+                            index++;
+                        }
+                        
+                    }
+                    /*for (int j = 0; j < base64tables.Length; j++)
                     {
                         if (base64tables[j] == chars[i])
                         {
                             string s = Convert.ToString(j, 2).PadLeft(6, '0');
                             binaryStr += s;
                         }
+                    }*/
+                    if(i % 10000 == 0)
+                    {
+                        Console.WriteLine(i);
+                        //binaryStr = "";
                     }
                 }
-                int length = binaryStr.Length;
+                /*int length = binaryStr.Length;
                 int cnt = length / 8; 
                 int index = 0;
                 byte[] buffer = new byte[cnt];
@@ -60,7 +113,7 @@ namespace Base64ToFile
                     string sub = binaryStr.Substring((i * 8), 8);
                     buffer[index] = Convert.ToByte(sub, 2);
                     index++;
-                }
+                }*/
                 return buffer;
             }
             catch(Exception ex)
@@ -73,6 +126,13 @@ namespace Base64ToFile
 
         static void Main(string[] args)
         {
+            //string text = "JVBERi0xLjcKJfbk";
+            //byte[] bb = ConvertToBase64Buffer(text);
+
+            //Console.WriteLine("DDD: " + Encoding.ASCII.GetString(bb));
+
+            //return;
+
             /*string text = "JVBERi0xLjcKJfbk/N8KMS";
             //string text = "aaa";
             byte[] b1 = Encoding.ASCII.GetBytes(text);
@@ -137,7 +197,7 @@ namespace Base64ToFile
 
             //Console.WriteLine($" {s2} ");
             */
-      
+
             byte[] buffer = new byte[0xffffff];
             using(FileStream fs = File.OpenRead("PDF1_Sign.txt"))
             {
@@ -162,6 +222,7 @@ namespace Base64ToFile
                 string resultString = Encoding.ASCII.GetString(buffer, 0, length);
                 byte[] result = ConvertToBase64Buffer(resultString);
                 File.WriteAllBytes("dddd7.pdf", result);
+                //File.WriteAllBytes("dddd77.txt", result);
 
                 //string message = myChars.ToString();
 
