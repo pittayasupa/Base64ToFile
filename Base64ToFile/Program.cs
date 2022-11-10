@@ -109,7 +109,7 @@ namespace Base64ToFile
                 //char[] myChars = Encoding.ASCII.GetString(buffer, 0, length).ToCharArray();
                 string resultString = Encoding.ASCII.GetString(buffer, 0, length);
                 byte[] result = ConvertToBase64Buffer(resultString);
-                File.WriteAllBytes("dddd7.pdf", result);
+                File.WriteAllBytes("dddd8.pdf", result);
                 //File.WriteAllBytes("dddd77.txt", result);
             }
         }
