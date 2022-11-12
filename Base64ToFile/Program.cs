@@ -132,7 +132,7 @@ namespace Base64ToFile
             return "unknow";
         }
 
-        public static string GetFileTypeFromMemberyStream(byte[] buffers)
+        public static string GetFileTypeFromMemoryStream(byte[] buffers)
         {
             if(buffers == null) return "unknow"; 
             try
@@ -168,7 +168,7 @@ namespace Base64ToFile
 
                 string fileName = "create_file";
                 fileName += "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", new CultureInfo("en-us"));
-                fileName += "." + GetFileTypeFromMemberyStream(result);
+                fileName += "." + GetFileTypeFromMemoryStream(result);
 
                 string currentDirectory = Environment.CurrentDirectory;
                 string filePath = "ExportFiles";  
