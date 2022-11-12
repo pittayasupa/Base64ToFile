@@ -111,12 +111,20 @@ namespace Base64ToFile
             if (buffers == null) return "txt";  
             if (ByteArrayCompare(new byte[] { 0x25, 0x50, 0x44, 0x46 }, buffers)) return "pdf";
             if (ByteArrayCompare(new byte[] { 0x0D, 0x44, 0x4F, 0x43 }, buffers)) return "doc"; 
+            if (ByteArrayCompare(new byte[] { 0xA0, 0x46, 0x1D, 0xF0 }, buffers)) return "ppt";
+            if (ByteArrayCompare(new byte[] { 0xEB, 0x3C, 0x90, 0x2A }, buffers)) return "img";
+            if (ByteArrayCompare(new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }, buffers)) return "jpeg";
+            if (ByteArrayCompare(new byte[] { 0xFF, 0xD8, 0xFF, 0xE1 }, buffers)) return "jpg";
+            if (ByteArrayCompare(new byte[] { 0xFF, 0xD8, 0xFF, 0xE8 }, buffers)) return "jpg"; 
+            if (ByteArrayCompare(new byte[] { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C }, buffers)) return "7z";
             if (ByteArrayCompare(new byte[] { 0x57, 0x69, 0x6E, 0x5A, 0x69, 0x70 }, buffers)) return "zip";
             if (ByteArrayCompare(new byte[] { 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07 }, buffers)) return "rar"; 
-            if (ByteArrayCompare(new byte[] { 0x25, 0x62, 0x69, 0x74, 0x6D, 0x61, 0x70 }, buffers)) return "bmp";
+            if (ByteArrayCompare(new byte[] { 0x25, 0x62, 0x69, 0x74, 0x6D, 0x61, 0x70 }, buffers)) return "bmp";  
+            if (ByteArrayCompare(new byte[] { 0x66, 0x74, 0x79, 0x70, 0x4D, 0x53, 0x4E, 0x56 }, buffers)) return "mp4";  
             if (ByteArrayCompare(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, buffers)) return "png";
             if (ByteArrayCompare(new byte[] { 0x09, 0x08, 0x10, 0x00, 0x00, 0x06, 0x05, 0x00 }, buffers)) return "xls";
             if (ByteArrayCompare(new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 }, buffers)) return "xlsx"; 
+            if (ByteArrayCompare(new byte[] { 0x50, 0x4B }, buffers)) return "zip"; 
             return "txt";
         }
 
