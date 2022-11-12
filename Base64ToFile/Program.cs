@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,59 +29,65 @@ namespace Base64ToFile
             '0', '1', '2','3','4','5','6','7','8','9',
             '+','/'
         };
-        public static byte[] ConvertToBase64Buffer(string base64String)
+        public static byte[] ConvertToBase64Buffer(string base64String, Encoding encoding = null, bool debug = false)
         {
-            if (string.IsNullOrEmpty(base64String)) return null;
+            if (string.IsNullOrEmpty(base64String))
+            {
+                Console.WriteLine("convert to base 64 error: base64String is null");
+                return null;
+            }
             try
             {
-                byte[] bytes = Encoding.ASCII.GetBytes(base64String);
-                char[] chars = Encoding.ASCII.GetString(bytes).ToCharArray();
+                if(encoding == null) encoding = Encoding.ASCII;
+                byte[] bytes = encoding.GetBytes(base64String);
+                char[] chars = encoding.GetString(bytes).ToCharArray();
 
-                int len = (chars.Length * 6) / 8;
-                byte[] buffer = new byte[len];
+                int length = (chars.Length * 6) / 8;
+                byte[] buffer = new byte[length];
                 int index = 0;
 
                 string binaryStr = "";
+                string readStr = "";
                 for (int i = 0; i < chars.Length; i++)
                 {
-                    int a = -1; 
-                    if (chars[i] >= '0' && chars[i] <= '9')
-                    {
-                        a = (chars[i] - 48) + 52;
+                    int base2char = -1;  
+                    if(chars[i] >= 'A' && chars[i] <= 'Z') {
+                        base2char = chars[i] - 'A';
                     }
-                    else if(chars[i] >= 'A' && chars[i] <= 'Z')
-                    {
-                        a = chars[i] - 65;
+                    else if (chars[i] >= 'a' && chars[i] <= 'z') {
+                        base2char = (chars[i] - 'a') + 26;
                     }
-                    else if (chars[i] >= 'a' && chars[i] <= 'z')
+                    else if (chars[i] >= '0' && chars[i] <= '9')
                     {
-                        a = (chars[i] - 97) + 26;
-                    } 
-                    else if (chars[i] == '+')
-                    {
-                        a = 62;
+                        base2char = (chars[i] - '0') + 52;
                     }
-                    else if (chars[i] == '/')
-                    {
-                        a = 63;
+                    else if (chars[i] == '+') {
+                        base2char = 62; 
                     }
-                    if (a >= 0)
-                    {
-                        string s = Convert.ToString(a, 2).PadLeft(6, '0');
-                        binaryStr += s;
-                         
-                        if (binaryStr.Length >= 8)
-                        {
+                    else if (chars[i] == '/') {
+                        base2char = 63;
+                    }
+                    else if (chars[i] == '=') { // padding
+                        base2char = 0;
+                    }
+                    if (base2char >= 0) {
+                        readStr = Convert.ToString(base2char, 2).PadLeft(6, '0');
+                        binaryStr += readStr; 
+                        if (binaryStr.Length >= 8) {
                             string sub = binaryStr.Substring(0, 8);
                             binaryStr = binaryStr.Substring(8);  
-                            buffer[index] = Convert.ToByte(sub, 2); ;
+                            buffer[index] = Convert.ToByte(sub, 2); 
                             index++;
                         } 
-                    } 
-                    if(i % 10000 == 0)
-                    {
-                        Console.WriteLine(i); 
                     }
+                    if (debug)
+                    {
+                        if (i % 100000 == 0 || i == chars.Length - 1)
+                        {
+                            double per = (i * 100.0) / chars.Length;
+                            Console.WriteLine(Math.Round(per, 2) + "%");
+                        }
+                    } 
                 } 
                 return buffer;
             }
@@ -100,31 +107,47 @@ namespace Base64ToFile
         } 
         public static string GetFileTypeFromBuffer(byte[] buffers)
         {
-            if (buffers == null) return ""; 
-            if (ByteArrayCompare(Encoding.ASCII.GetBytes(@"%PDF"), buffers)) return ".pdf"; 
-            if (ByteArrayCompare(Encoding.ASCII.GetBytes(@"‰PNG"), buffers)) return ".png"; 
-            return "";
+            if (buffers == null) return "txt";  
+            if (ByteArrayCompare(new byte[] { 0x25, 0x50, 0x44, 0x46 }, buffers)) return "pdf";
+            if (ByteArrayCompare(new byte[] { 0x0D, 0x44, 0x4F, 0x43 }, buffers)) return "doc"; 
+            if (ByteArrayCompare(new byte[] { 0x57, 0x69, 0x6E, 0x5A, 0x69, 0x70 }, buffers)) return "zip";
+            if (ByteArrayCompare(new byte[] { 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07 }, buffers)) return "rar"; 
+            if (ByteArrayCompare(new byte[] { 0x25, 0x62, 0x69, 0x74, 0x6D, 0x61, 0x70 }, buffers)) return "bmp";
+            if (ByteArrayCompare(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, buffers)) return "png";
+            if (ByteArrayCompare(new byte[] { 0x09, 0x08, 0x10, 0x00, 0x00, 0x06, 0x05, 0x00 }, buffers)) return "xls";
+            if (ByteArrayCompare(new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 }, buffers)) return "xlsx"; 
+            return "txt";
         }
 
         static void Main(string[] args)
         {
-            //string text = "JVBERi0xLjcKJfbk";
-            //byte[] bb = ConvertToBase64Buffer(text);
+            string sss = "Zm9vYg==";
+            byte[] bytes = ConvertToBase64Buffer(sss, Encoding.ASCII);
+            string res = Encoding.ASCII.GetString(bytes);
+            Console.WriteLine(res); 
+            //return; 
 
-            //Console.WriteLine("DDD: " + Encoding.ASCII.GetString(bb));
 
-            //return;
-
-           
-            byte[] buffer = new byte[0xffffff];
-            using(FileStream fs = File.OpenRead("PDF1_Sign.txt"))
+            byte[] buffer = new byte[0xffffff]; //16777215
+            using (FileStream fs = File.OpenRead(@"Resources\base64String.txt"))
             {
-                int length = fs.Read(buffer, 0, buffer.Length);
-                //char[] myChars = Encoding.ASCII.GetString(buffer, 0, length).ToCharArray();
-                string resultString = Encoding.ASCII.GetString(buffer, 0, length);
-                byte[] result = ConvertToBase64Buffer(resultString);
-                File.WriteAllBytes("dddd8.pdf", result);
-                //File.WriteAllBytes("dddd77.txt", result);
+                int length = fs.Read(buffer, 0, buffer.Length); 
+                string resultString = Encoding.ASCII.GetString(buffer, 0, length); 
+                byte[] result = ConvertToBase64Buffer(resultString, Encoding.ASCII, true);
+
+                string fileName = "create_file";
+                fileName += "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", new CultureInfo("en-us"));
+                fileName += "." + GetFileTypeFromBuffer(result);
+
+                string currentDirectory = Environment.CurrentDirectory;
+                string filePath = "ExportFiles";  
+                string fileFullPath = Path.Combine(currentDirectory, filePath, fileName);
+
+                if (!Directory.Exists(Path.GetDirectoryName(fileFullPath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(fileFullPath));
+                } 
+                File.WriteAllBytes(fileFullPath, result); 
             }
         }
     }
