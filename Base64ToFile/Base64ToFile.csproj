@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="File.TypeChecker" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Resources\base64String.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

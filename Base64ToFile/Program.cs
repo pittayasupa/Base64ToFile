@@ -1,6 +1,10 @@
-﻿using System;
+﻿using FileTypeChecker;
+using FileTypeChecker.Abstracts;
+using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -108,7 +112,7 @@ namespace Base64ToFile
         } 
         public static string GetFileTypeFromBuffer(byte[] buffers)
         {
-            if (buffers == null) return "txt";  
+            if (buffers == null) return "unknow";  
             if (ByteArrayCompare(new byte[] { 0x25, 0x50, 0x44, 0x46 }, buffers)) return "pdf";
             if (ByteArrayCompare(new byte[] { 0x0D, 0x44, 0x4F, 0x43 }, buffers)) return "doc"; 
             if (ByteArrayCompare(new byte[] { 0xA0, 0x46, 0x1D, 0xF0 }, buffers)) return "ppt";
@@ -125,7 +129,25 @@ namespace Base64ToFile
             if (ByteArrayCompare(new byte[] { 0x09, 0x08, 0x10, 0x00, 0x00, 0x06, 0x05, 0x00 }, buffers)) return "xls";
             if (ByteArrayCompare(new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 }, buffers)) return "xlsx"; 
             if (ByteArrayCompare(new byte[] { 0x50, 0x4B }, buffers)) return "zip"; 
-            return "txt";
+            return "unknow";
+        }
+
+        public static string GetFileTypeFromMemberyStream(byte[] buffers)
+        {
+            if(buffers == null) return "unknow"; 
+            try
+            {
+                using (MemoryStream memoryStream = new MemoryStream(buffers))
+                {
+                    IFileType fileType = FileTypeValidator.GetFileType(memoryStream); 
+                    return fileType.Extension;
+                } 
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("get fiel type from memory stream error: " + ex.Message);
+                return "unknow";
+            } 
         }
 
         static void Main(string[] args)
@@ -142,11 +164,11 @@ namespace Base64ToFile
             {
                 int length = fs.Read(buffer, 0, buffer.Length); 
                 string resultString = Encoding.ASCII.GetString(buffer, 0, length); 
-                byte[] result = ConvertToBase64Buffer(resultString, Encoding.ASCII, true);
+                byte[] result = ConvertToBase64Buffer(resultString, Encoding.ASCII, true); 
 
                 string fileName = "create_file";
                 fileName += "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", new CultureInfo("en-us"));
-                fileName += "." + GetFileTypeFromBuffer(result);
+                fileName += "." + GetFileTypeFromMemberyStream(result);
 
                 string currentDirectory = Environment.CurrentDirectory;
                 string filePath = "ExportFiles";  
