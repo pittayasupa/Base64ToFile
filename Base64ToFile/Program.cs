@@ -91,6 +91,20 @@ namespace Base64ToFile
             } 
         }
 
+        public static bool ByteArrayCompare(byte[] a, byte[] b)
+        {
+            if(a.Length > b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i]) return false;
+            return true;
+        } 
+        public static string GetFileTypeFromBuffer(byte[] buffers)
+        {
+            if (buffers == null) return ""; 
+            if (ByteArrayCompare(Encoding.ASCII.GetBytes(@"%PDF"), buffers)) return ".pdf"; 
+            if (ByteArrayCompare(Encoding.ASCII.GetBytes(@"‰PNG"), buffers)) return ".png"; 
+            return "";
+        }
 
         static void Main(string[] args)
         {
